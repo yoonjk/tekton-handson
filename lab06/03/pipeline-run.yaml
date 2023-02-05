@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: mvn-pipeline-run-
+spec:
+  pipelineRef:
+    name: mvn-pipeline
+  resources:
+  - name: app-git
+    resourceSpec:
+      type: git
+      params:
+        - name: url
+          value: https://gitlab.com/nexweb/sample-service.git 
+        - name: revision 
+          value: "msa"
+  workspaces:
+  - name: local-maven-repo
+    persistentVolumeClaim:
+      claimName:  maven-repo-pvc
+  timeout: 60s
+

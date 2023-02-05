@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Pipeline 
+metadata: 
+  name: sonarqube-pipeline 
+spec: 
+  workspaces: 
+    - name: shared-workspace 
+    - name: sonar-settings 
+  tasks:
+    - name: fetch-repository 
+      taskRef:
+        name: git-clone 
+      workspaces:
+        - name: output 
+          workspace: shared-workspace 
+      params: 
+        - name: url 
+          value: https://gitlab.com/nexweb/sample-service.git 
+        - name: revision 
+          value: "hello"
+        - name: subdirectory
+          value: "" 
+        - name: deleteExisting 
+          value: "true" 
+    - name: build-maven
+      taskRef:
+        name: build-maven 
+      runAfter:
+        - "fetch-repository"
+      workspaces:
+        - name: output 
+          workspace: shared-workspace   
+    - name: code-analysis 
+      taskRef:
+        name: sonarqube-scanner 
+      runAfter:
+        - "build-maven" 
+      params: 
+        - name: SONAR_HOST_URL 
+          value: http://161.202.187.250:9000
+        - name: SONAR_PROJECT_KEY 
+          value: sample-service 
+      workspaces:
+        - name: output 
+          workspace: shared-workspace 
+        - name: sonar-settings 
+          workspace: sonar-settings

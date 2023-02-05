@@ -1,0 +1,29 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: gitlab-trigger-template
+spec:
+  params:  # 매개변수 정의
+  - name: git-revision
+  - name: git-repo-url
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: springboot-app-trigger-run-  #  Generate name of PipelineRun
+    spec:
+      serviceAccountName: tekton-triggers-gitlab-sa
+      pipelineRef:
+        name: source-to-image
+      params:
+        - name: git-repo-url
+          value: $(tt.params.git-repo-url)
+        - name: git-revision
+          value: $(tt.params.git-revision)
+      workspaces:
+        - name: shared-workspace
+          persistentVolumeClaim: 
+            claimName: maven-cache
+
+          
+      

@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline 
+metadata: 
+  name: build-and-deploy-pipeline 
+spec: 
+  workspaces:
+    - name: git-source
+  params:
+    - name: url 
+      description: Git repository url
+    - name: revision 
+      description: Git revision to check out
+      default: "hello"
+  tasks:
+    - name: git-clone 
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output 
+          workspace: git-source
+      params:
+        - name: url 
+          value: "$(params.url)"
+        - name: revision 
+          value: "$(params.revision)"
+    - name: build-maven
+      taskRef:
+        name: build-maven 
+      runAfter:
+        - "git-clone"
+      workspaces:
+        - name: output 
+          workspace: git-source
+    - name: build-and-push 
+      taskRef: 
+        name: build-and-push 
+      runAfter:
+        - "build-maven"
+      workspaces:
+        - name: output 
+          workspace: git-source   
+    - name: deploy-using-kubectl
+      taskRef: 
+        name: deploy-using-kubectl 
+      runAfter: 
+        - "build-and-push" 
+      workspaces:
+        - name: output 
+          workspace: git-source      
+
+
+
+

@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1 
+kind: PipelineRun 
+metadata: 
+  generateName: sonarqube-pipeline-run-
+spec: 
+  workspaces:
+    - name: shared-workspace 
+      persistentVolumeClaim:
+        claimName: my-local-pvc 
+    - name: sonar-settings
+      subPath: maven-repo-cache
+      persistentVolumeClaim:
+        claimName: my-local-pvc
+  pipelineRef:
+    name: sonarqube-pipeline
+    
+

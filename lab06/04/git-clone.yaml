@@ -1,0 +1,77 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task 
+metadata:
+  name: git-clone 
+spec: 
+  workspaces:
+    - name: source
+      description: The git repo will be cloned onto the volume backing this workspace
+  params:
+    - name: url
+      default: https://gitlab.com/nexweb/sample-service.git
+    - name: revision
+      description: git revision to checkout (branch, tag, sha, ref…)
+      default: "hello"
+    - name: subdirectory
+      description: subdirectory inside the "output" workspace to clone the git repo into
+      default: ""
+    - name: deleteExisting
+      default: "true"
+    - name: verbose
+      description: log command that are executed during git-clone's operations
+      default: "true"
+  results:
+    - description: The precise commit SHA that was fetched by this Task.
+      name: commit
+    - description: The precise URL that was fetched by this Task.
+      name: url
+  steps:
+    - name: clone
+      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.21.0
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+
+        if [[ "$(params.verbose)" == "true" ]]; then 
+          set -x
+        fi
+
+        CHECKOUT_DIR="$(workspaces.source.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+        
+        if [[ "$(params.deleteExisting)" == "true" ]] ; then
+          cleandir
+        fi
+
+        /ko-app/git-init \
+          -url "$(params.url)" \
+          -revision "$(params.revision)" \
+          -path "$CHECKOUT_DIR"
+
+        cd "$CHECKOUT_DIR"
+        ls "$CHECKOUT_DIR"
+        RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
+        EXIT_CODE="$?"
+
+        if [ "$EXIT_CODE" != 0 ]; then
+          exit $EXIT_CODE
+        fi
+
+        # Make sure we don't add a trailing newline to the result!
+        echo -n "$RESULT_SHA" 
+        printf "%s" "${RESULT_SHA}" > "$(results.commit.path)"
+        printf "%s" "$(params.url)" > "$(results.url.path)"
+

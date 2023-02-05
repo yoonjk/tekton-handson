@@ -1,0 +1,13 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: git-clone-run-
+spec:
+  workspaces:
+    - name: output
+      emptyDir: {}
+  params:
+    - name: url
+      value: https://gitlab.com/nexweb/handson-tekton.git
+  taskRef:
+    name: git-clone

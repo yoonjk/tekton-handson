@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: build-and-push-pipeline-run-
+spec:
+  pipelineRef:
+    name: build-and-push-pipeline
+  params:
+    - name: gitUrl
+      value: https://gitlab.com/nexweb/sample-service.git
+    - name: pathToContext
+      value: .
+    - name: pathToYamlFile
+      value: "deployment/sample.yaml"
+    - name: imageUrl
+      value: nexweb1/sample
+    - name: imageTag
+      value: "dev"
+  serviceAccountName: default
+  workspaces:
+    - name: git-source
+      persistentVolumeClaim:
+        claimName: my-local-pvc

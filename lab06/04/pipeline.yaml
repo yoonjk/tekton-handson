@@ -1,0 +1,89 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: source-to-image
+spec:
+  params:
+    - name: git-repo-url
+      type: string
+      description: git repository url to clone
+      default: "https://gitlab.com/nexweb/sample-service.git"
+    - name: git-revision
+      type: string
+      description: git revision to checkout (branch, tag, sha, ref)
+      default: hello
+    - name: image-build-context
+      type: string
+      description: The path to the build context, used by Kaniko - within the workspace
+      default: "."
+    - name: image-url
+      type: string
+      description: Url of image repository
+      default: docker.io/nexweb1/sample
+    - name: version
+      description: The version of the application
+      type: string
+      default: "v0.9" 
+    - name: deploy-config-file
+      type: string
+      description: The path to the yaml file to deploy within the git source
+      default: deployment/sample.yaml
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: git-clone
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: "$(params.git-repo-url)"
+        - name: revision
+          value: "$(params.git-revision)"
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: build-to-package
+      taskRef:
+        name: build-to-package
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      runAfter:
+        - git-clone
+    - name: generate-build-id
+      taskRef:
+        name: generate-build-id
+      params:
+        - name: version
+          value: "$(params.version)"
+      runAfter:
+        - git-clone
+    - name: image-build-and-push
+      taskRef:
+        name: image-build-and-push
+      params:
+        - name: image-url
+          value: "$(params.image-url)"
+        - name: image-tag
+          value: "$(tasks.generate-build-id.results.buildId)"
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      runAfter:
+        - generate-build-id
+        - build-to-package
+    - name: deploy-to-cluster
+      taskRef:
+        name: deploy-using-kubectl
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: deploy-config-file
+          value: $(params.deploy-config-file)
+        - name: image-url
+          value: $(params.image-url)
+        - name: image-tag
+          value: "$(tasks.generate-build-id.results.buildId)"
+      runAfter:
+        - image-build-and-push

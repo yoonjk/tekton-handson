@@ -1,0 +1,59 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task 
+metadata: 
+  name: build-and-push
+spec: 
+  workspaces:
+    - name: output 
+  params:
+    - name: CONTEXT
+      description: image's context root path 
+      default: "."
+    - name: IMAGE
+      description: image name 
+      default: docker.io/nexweb1/sample:dev
+    - name: tlsVerify 
+      default: "true"
+    - name: DOCKERFILE 
+      default: deployment/Dockerfile
+    - name: verbose 
+      default: "true"
+  steps:
+  - name: build-and-push
+    workingDir: $(workspaces.output.path)
+    image: quay.io/buildah/stable
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    script: |
+      #!/usr/bin/env bash
+      set -eu 
+
+      if [[ "$(params.verbose)" == "true" ]]; then 
+        set -x
+      fi
+
+      buildah bud --tls-verify=$(params.tlsVerify) \
+      --layers  -f $(params.DOCKERFILE) \
+      -t $(params.IMAGE) $(params.CONTEXT)
+      buildah push --tls-verify=$(params.tlsVerify) $(params.IMAGE) \ 
+      docker://$(params.IMAGE)
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /tekton/home/.docker
+      - name: varlibc
+        mountPath: /var/lib/containers
+    securityContext:
+      privileged: true
+      runAsUser: 0
+  volumes:
+    - name: varlibc 
+      emptyDir: {}
+    - name: kaniko-secret 
+      secret: 
+        secretName: docker-credentials 
+        items: 
+          - key: .dockerconfigjson 
+            path: config.json
+
+

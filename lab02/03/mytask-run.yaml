@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1 
+kind: TaskRun 
+metadata:
+  name: mytask-run
+spec:
+  taskRef:
+    name: mytask 
+  podTemplate:
+    securityContext:
+      runAsNonRoot: true
+    volumes:
+      - name: my-cache
+        persistentVolumeClaim:
+          claimName: my-pvc

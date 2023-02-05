@@ -1,0 +1,44 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: github-pr-template
+spec:
+  params:
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: commit
+      description: The git revision (SHA)
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: build-deploy-
+    spec:
+      pipelineRef:
+        name: java-pipeline
+      serviceAccountName: docker-login
+      timeout: 3m
+      params:
+      - name: buildRevision
+        value: '$(tt.params.commit)'
+      - name: appGitUrl
+        value: 'https://github.com/yoonjk/sample-service.git'
+      - name: appGitRevision
+        value: hello
+      - name: configGitUrl
+        value: 'https://github.com/yoonjk/sample-service-deploy.git'
+      - name: IMAGE
+        value: 'docker.io/nexweb1/sample'
+      - name: deployYamlFile
+        value: deployment/sample.yaml
+      - name: configGitRevision
+        value: main
+      - name: argoAppName
+        value: sample    
+      workspaces:
+      - name: maven-settings
+        configMap:
+          name: custom-maven-settings
+      - name: shared-workspace
+        persistentVolumeClaim:
+          claimName: pipeline-pvc

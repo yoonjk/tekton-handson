@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1 
+kind: PipelineRun 
+metadata:
+  name: pipelinerun-with-resourcespec 
+spec: 
+  resources:
+    - name: appSource 
+      resourceSpec:
+        type: git
+        params:
+          - name: revision
+            value: main
+          - name: url 
+            value: https://gitlab.com/nexweb/handson-tekton.git
+  pipelineRef:
+    name: pipeline-to-list-files

@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1beta1 
+kind: TaskRun
+metadata:
+  name: initial-user00-task-run-1
+spec:
+  taskRef:
+    name: initial-user00-task
+  workspaces:
+    - name: task-ws 
+      emptyDir: {}

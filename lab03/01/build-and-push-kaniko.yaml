@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task 
+metadata: 
+  name: build-and-push
+spec: 
+  workspaces:
+    - name: output 
+  params:
+    - name: CONTEXT
+      description: image's context root path 
+      default: "."
+    - name: IMAGE
+      description: image name 
+      default: docker.io/nexweb1/sample:dev
+    - name: imageTag 
+      description: image tag
+      default: dev
+    - name: tlsVerify 
+      default: "true"
+    - name: DOCKERFILE 
+      default: "./deployment/Dockerfile"
+    - name: FORMAT
+      default: "oci"
+    - name: verbose 
+      default: "true"
+  steps:
+  - name: build-and-push-kaniko
+    workingDir: $(workspaces.output.path)
+    image: gcr.io/kaniko-project/executor:latest
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    - name: IMAGE_DIGEST 
+      value: 
+    command:
+    - /kaniko/executor
+    - --dockerfile=$(params.DOCKERFILE)
+    - --context=$(workspaces.output.path)/$(params.CONTEXT)  # The user does not need to care the workspace and the source.
+    - --destination=$(params.IMAGE)
+    - --oci-layout-path=$(workspaces.output.path)/$(params.CONTEXT)/image-digest
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /tekton/home/.docker
+  volumes:
+    - name: kaniko-secret 
+      secret: 
+        secretName: docker-credentials 
+        items: 
+          - key: .dockerconfigjson 
+            path: config.json
+
+

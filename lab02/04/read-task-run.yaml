@@ -1,0 +1,13 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: read-user00-task-run
+spec:
+  resources:
+    inputs:
+      - name: source 
+        resourceRef:
+          name: nodejs-source
+  taskRef:
+    name: read-task
+

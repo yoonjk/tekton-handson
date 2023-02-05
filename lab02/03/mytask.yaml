@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task 
+metadata:
+  name: mytask 
+spec:
+  steps:
+    - name: write-task
+      image: bash
+      script: |
+        echo 'Hello' > /my-cache/hello
+        cat /my-cache/hello
+      volumeMounts:
+        - name: my-cache 
+          mountPath: /my-cache 

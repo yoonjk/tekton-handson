@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Pipeline 
+metadata: 
+  name: hello-goodbye-user00-pipeline 
+spec:
+  tasks:
+    - name: first-task 
+      taskRef:
+        name: hello-world-user00 
+    - name: goodbye-task
+      taskRef:
+        name: goodbye-user00
+      runAfter:
+        - "first-task"
+ 
+        

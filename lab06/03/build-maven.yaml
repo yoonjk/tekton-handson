@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task 
+metadata:
+  name: build-maven
+spec: 
+  workspaces:
+    - name: output
+  resources:
+    inputs:
+      - name: source 
+        type: git
+  params:
+    - name: GOALS
+      description: The Maven goals to run
+      type: array 
+      default: ["package"]
+  steps:
+    - name: maven 
+      image: docker.io/maven:3.6.3-openjdk-8-slim
+      workingDir: $(workspaces.output.path)
+      command:
+        - mvn 
+      args:
+        - -Dmaven.repo.local=$(workspaces.output.path)
+        - -DskipTest
+        - $(params.GOALS)
+    - name: target-list
+      image: alpine 
+      workingDir: $(workspaces.output.path)
+      script: |
+        #!/bin/sh
+        echo "========= maven target output =========" 
+        ls -lt $(workspaces.output.path)/target
+
+       
+        

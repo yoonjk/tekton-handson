@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task
+metadata:
+  name: read-task
+spec:
+  # params:
+  resources:
+    inputs:
+      - name: source
+        type: git
+  steps:
+    - name: build-sources
+      image: ubuntu
+      script: |
+        #!/bin/bash
+        cat $(resources.inputs.source.path)/README.md

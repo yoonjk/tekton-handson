@@ -1,0 +1,24 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task 
+metadata: 
+  name: deploy-using-kubectl
+spec: 
+  description: |-
+    manifest 파용을 K8s cluster에 적용합니다.
+    manifest 을 한번에 적용하기 위해 kustomization resources에 추가합니다.
+  workspaces:
+    - name: output
+  params:
+    - name: pathToKustomize 
+      description: manifest file's path
+      default: deployment
+  steps: 
+    - name: deploy-using-kubectl 
+      image: lachlanevenson/k8s-kubectl
+      workingDir: $(workspaces.output.path)
+      args:
+        - "apply"
+        - "-k" 
+        - "$(params.pathToKustomize)"
+      
+

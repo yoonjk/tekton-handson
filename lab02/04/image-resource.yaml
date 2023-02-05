@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1alpha1 
+kind: PipelineResource 
+metadata:
+  name: my-user00-image 
+spec:
+  type: image
+  params:
+    - name: url 
+      value: docker.io/nexweb1/nodejs-hello:dev
+  
+  

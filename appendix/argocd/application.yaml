@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: my_channel
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: my_channel
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: my_channel
+    notifications.argoproj.io/subscribe.on-sync-status-missing.slack: my_channel
+    notified.notifications.argoproj.io: '{"on-sync-succeeded:[0].zxM90Et6k4Elb1-fHdjtDJq0xR0:slack:my_channel":1665734002}'
+    recipients.argocd-notifications.argoproj.io: slack:my_channel
+  creationTimestamp: "2022-10-14T05:15:17Z"
+  generation: 231
+  name: sample
+  namespace: argocd
+  resourceVersion: "59007"
+  uid: 62e51613-48b9-4213-8f62-19f8dc59694d
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: deployment
+    repoURL: https://github.com/yoonjk/sample-service-deploy.git
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - ApplyOutOfSyncOnly=true
+    - PruneLast=true

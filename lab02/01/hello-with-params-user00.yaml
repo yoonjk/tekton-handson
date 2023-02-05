@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task 
+metadata: 
+  name: hello-with-params-user00
+spec:
+  params:
+    - name: person
+      description: person name.
+      type: string
+  steps:
+    - name: say-hello
+      image: busybox
+      command: 
+        - /bin/sh
+      args: 
+        - -c
+        - 'echo Hello $(params.person)'
+
+        

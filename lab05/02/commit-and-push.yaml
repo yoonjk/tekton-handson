@@ -1,0 +1,95 @@
+
+apiVersion: tekton.dev/v1beta1
+kind: Task 
+metadata:
+  name: update-yaml 
+spec: 
+  params:
+    - name: IMAGE
+      description: Image Name 
+    - name: buildRevision 
+      description: Revision image tag
+    - name: contextPath 
+      description: Path of manifest file 
+      default: '.'
+    - name: pathToYamlFile 
+      description: Deployment yaml file
+    - name: argo-app-name
+      description: argocd app name
+    - name: url
+      description: configGitUrl
+    - name: revision
+      description: git revision to checkout (branch, tag, sha, ref…)
+    - name: subdirectory
+      description: subdirectory inside the "output" workspace to clone the git repo into
+      default: ""
+    - name: deleteExisting
+      default: "true"
+    - name: verbose
+      description: log command that are executed during git-clone's operations
+      default: "true"      
+  workspaces:
+    - name: output
+  stepTemplate:
+    envFrom:
+    - secretRef:
+        name: argocd-env-secret
+    env:
+    - name: ARGOCD_SERVER
+      value: "159.122.179.241:30359"
+  results:
+    - description: The precise commit SHA that was fetched by this Task.
+      name: commit
+    - description: The precise URL that was fetched by this Task.
+      name: url
+  steps: 
+    - name: clone
+      image: alpine/git:v2.26.2
+      workingDir: "$(workspaces.output.path)"
+      script: |
+        #!/usr/bin/env sh
+        set -e
+        CHECKOUT_DIR="$(workspaces.output.path)/$(params.subdirectory)"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
+          # or the root of a mounted volume.
+          if [[ -d "$CHECKOUT_DIR" ]] ; then
+            # Delete non-hidden files and directories
+            rm -rf "$CHECKOUT_DIR"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "$CHECKOUT_DIR"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "$CHECKOUT_DIR"/..?*
+          fi
+        }
+
+        if [[ "$(params.deleteExisting)" == "true" ]] ; then
+          cleandir
+        fi
+
+        git clone $(params.url) $CHECKOUT_DIR -b $(params.revision)
+
+    - name: commit-push-changes-gitops
+      image: alpine/git:v2.26.2
+      workingDir: "$(workspaces.output.path)/$(params.contextPath)"
+      script: |
+        #!/usr/bin/env sh
+        set -e
+        git config --global user.email "nexweb1@gmail.com"
+        git config --global user.name "yoonjk"
+        ls -al 
+        cat $(params.pathToYamlFile) | grep -E "image:" | awk '{print "Before =>"$0 }'
+        sed -i "s#$(inputs.params.IMAGE):[a-zA-Z0-9]\\+#$(inputs.params.IMAGE):$(inputs.params.buildRevision)#g" $(params.pathToYamlFile)
+        cat $(params.pathToYamlFile) | grep -E "image:" | awk '{print "After =>"$0 }'
+        git add $(params.pathToYamlFile)
+        git commit -m "[tekton] updating $(params.IMAGE) image to $(params.buildRevision)"
+        git push 
+    - name: wait-for-argocd-rollout
+      image: argoproj/argocd:v1.7.7
+      script: |
+        #!/usr/bin/env sh
+        set -e
+        argocd app sync $(inputs.params.argo-app-name) --insecure
+        argocd app wait $(inputs.params.argo-app-name) --sync --health --operation --insecure      

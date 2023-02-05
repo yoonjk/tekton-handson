@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task 
+metadata:
+  name: final-user00-task
+spec: 
+  workspaces:
+    - name: task-ws 
+      description:  The folder where we write the message to
+  steps:
+    - name: final-task
+      image: alpine 
+      script: |
+        #!/bin/sh 
+        echo "Starting final task"
+        cat $(workspaces.task-ws.path)/message.txt

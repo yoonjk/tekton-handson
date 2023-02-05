@@ -1,0 +1,8 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: demo-pipeline
+spec:
+  serviceAccountName: build-bot
+  pipelineRef:
+    name: demo-pipeline

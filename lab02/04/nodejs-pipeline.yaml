@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline 
+metadata:
+  name: nodejs-pipeline
+spec: 
+  resources:
+    - name: appSource 
+      type: git 
+    - name: appImage 
+      type: image 
+  tasks:
+    - name: build-and-push 
+      taskRef:
+        name: build-push-task
+      resources:
+        inputs:
+          - name: source 
+            resource: appSource
+        outputs:
+          - name: image
+            resource: appImage

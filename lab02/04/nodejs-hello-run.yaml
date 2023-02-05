@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: build-push-user00-task-run-
+spec:
+  serviceAccountName: default
+  resources:
+    inputs:
+      - name: source
+        resourceRef:
+          name: nodejs-source
+    outputs:
+      - name: image
+        resourceRef:
+          name: my-image
+  taskRef:
+    name: build-push-user00-task
+
+#  podTemplate:
+#    volumes:
+#      - name: kaniko-secret
+#        secret:
+#          secretName: docker-registry
+#          items:
+#            - key: .dockerconfigjson
+#              path: config.json

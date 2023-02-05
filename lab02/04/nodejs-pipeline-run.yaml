@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1beta1 
+kind: PipelineRun
+metadata: 
+  generateName: nodejs-pipeline-run- 
+spec: 
+  resources:
+    - name: appSource
+      resourceRef:
+        name: nodejs-source
+    - name: appImage
+      resourceRef: 
+        name: my-image
+  pipelineRef:
+    name: nodejs-pipeline
+  

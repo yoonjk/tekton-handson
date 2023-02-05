@@ -1,0 +1,21 @@
+    apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: s2i-trigger-run-  # TaskRun 名称前缀
+    spec:
+      serviceAccountName: default
+      pipelineRef:
+        name: source-to-image
+      params:
+        - name: git-repo-url
+          value: https://gitlab.com/nexweb/sample-service.git
+        - name: git-revision
+          value: hello
+      workspaces:
+        - name: shared-workspace
+          persistentVolumeClaim:
+            claimName: maven-cache
+        - name: docker-config
+          secret:
+            secretName: docker-credentials
+      timeout: 120s

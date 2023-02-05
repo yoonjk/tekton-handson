@@ -1,0 +1,32 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: github-pr-template
+spec:
+  params:
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: commit
+      description: The git revision (SHA)
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun 
+      metadata:
+        generateName: github-pr-pipeline-run-
+      spec:
+        serviceAccountName: docker-login
+        pipelineRef: 
+          name: nodejs-pipeline
+        params:
+          - name: github-repo-url
+            value: '$(tt.params.gitrepositoryurl)'
+          - name: github-commit
+            value: '$(tt.params.commit)'       
+          - name: IMAGE
+            value: nexweb1/nodejs-app
+          - name: TAG
+            value: latest
+        workspaces:
+          - name: linked-workspace
+            persistentVolumeClaim:
+              claimName: pipeline-pvc

@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: nodejs-user00-source
+spec:
+  type: git
+  params:
+    - name: url
+      value: https://gitlab.com/nexweb/handson-tekton.git
+    - name: resvision
+      value: main
+

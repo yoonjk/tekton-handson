@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha
+kind: Application
+metadata:
+  name: sample
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  project: default
+  source:
+    path: deployment
+    repoURL: https://github.com/yoonjk/sample-service-deploy.git
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - PrunceLast=true

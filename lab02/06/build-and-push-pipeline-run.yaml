@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: build-and-push-pipeline-run-
+spec:
+  pipelineRef:
+    name: build-and-push-pipeline
+  params:
+    - name: gitUrl
+      value: https://gitlab.com/nexweb/handson-tekton.git
+    - name: pathToContext
+      value: .
+    - name: pathToYamlFile
+      value: "app/nodejs/deployment.yaml"
+    - name: imageUrl
+      value: nexweb1/hello
+    - name: imageTag
+      value: "dev"
+  serviceAccountName: default
+  workspaces:
+    - name: git-source
+      persistentVolumeClaim:
+        claimName: my-local-pvc

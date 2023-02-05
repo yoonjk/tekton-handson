@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: slack-token-secret
+stringData:
+  token: xoxb-xxxx
+

@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress 
+metadata:
+  name: tekton-webhook-ing
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec: 
+  rules: 
+    - host: gitlab.159.122.174.119.nip.io
+      http:
+        paths: 
+          - pathType: ImplementationSpecific
+            backend:
+              service: 
+                name: el-gitlab-event-listener
+                port:
+                  number: 8080

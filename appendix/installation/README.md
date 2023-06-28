@@ -4,7 +4,7 @@
 ```bash
 kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 ```
-
+#### Tekton Dashboard's Pod
 ![tekton installed pods]( /images/install-tekton.png)
 
 ## Install Tekton Dashboard
@@ -12,7 +12,7 @@ kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline
 # https://tekton.dev/docs/dashboard/install/
 kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
 ```
-
+#### Tekton Dashboard's Pod
 ![tekton dashboard pods]( /images/install-tekton-dashboard.png)
 
 # Install nginx-ingress
@@ -27,9 +27,9 @@ kubectl apply --filename \
 https://storage.googleapis.com/tekton-releases/triggers/latest/interceptors.yaml
 ```
 
-#### Install Trigger
+#### Trigger's Pods
 ![tekton trigger pods]( /images/install-trigger.png)
 
-#### Install Interceptor
+#### Interceptor's Pod
 ![tekton interceptor pods]( /images/install-interceptor.png)
 

@@ -7,7 +7,7 @@ kubectl apply -f - <<EOF
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tekton_dashboard
+  name: tekton-dashboard
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -24,3 +24,4 @@ spec:
                 name: tekton-dashboard
                 port:
                   number: 9097
+EOF

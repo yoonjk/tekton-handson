@@ -16,8 +16,10 @@ kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboar
 ![tekton dashboard pods]( /images/install-tekton-dashboard.png)
 
 # Install nginx-ingress
-kubectl create ns ingress-nginx
+```bash
+kubectl create ns ingress-nginx  
 helm install nginx-ingress nginx-stable/nginx-ingress --set rbac.create=true --namespace ingress-nginx
+```
 
 ## Install Tekton Trigger
 ```bash

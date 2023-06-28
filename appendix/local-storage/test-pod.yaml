@@ -1,0 +1,27 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: test-pod
+spec:
+  containers:
+  - name: test-pod
+    image: nginx
+    volumeMounts:
+      - name: nfs-pvc
+        mountPath: "/mydata"
+  volumes:
+    - name: nfs-pvc
+      persistentVolumeClaim:
+        claimName: my-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 128Mi

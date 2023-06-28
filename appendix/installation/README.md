@@ -5,7 +5,7 @@
 kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 ```
 
-![tekton installed pods]({{ "/images/basic-tekton-install.png" }})
+![tekton installed pods]({{ "images/basic-tekton-install.png" }})
 
 ## Install Tekton Dashboard
 ```bash

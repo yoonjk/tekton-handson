@@ -36,8 +36,7 @@ spec:
       buildah bud --tls-verify=$(params.tlsVerify) \
       --layers  -f $(params.DOCKERFILE) \
       -t $(params.IMAGE) $(params.CONTEXT)
-      buildah push --tls-verify=$(params.tlsVerify) $(params.IMAGE) \ 
-      docker://$(params.IMAGE)
+      buildah push --tls-verify=$(params.tlsVerify) $(params.IMAGE)  
     volumeMounts:
       - name: kaniko-secret
         mountPath: /tekton/home/.docker

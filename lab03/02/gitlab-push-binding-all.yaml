@@ -1,0 +1,14 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: gitlab-push-binding
+spec:
+  params:
+  - name: git-revision
+    value: $(body.ref)
+  - name: git-repo-url
+    value: $(body.repository.git_http_url)
+  - name: image-url
+    value: nexweb1/sample          #ikubernetes/spring-boot-helloworld
+  - name: version
+    value: v0.9  

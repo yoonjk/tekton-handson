@@ -8,7 +8,7 @@ metadata:
   namespace: tekton-pipelines
 spec:
   rules:
-    - host: telkton-dashboard.xxx.xxx.xxx.xxx.nip.io
+    - host: tekton-dashboard.119.81.23.180.nip.io
       http:
         paths:
           - path: /

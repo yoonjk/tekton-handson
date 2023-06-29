@@ -29,6 +29,10 @@ spec:
     - name: argoAppName
       description: argo app name 
       default: sample
+    - name: version
+      description: The version of the application
+      type: string
+      default: "v0.9" 
   workspaces:
     - name: shared-workspace
     - name: maven-settings
@@ -69,6 +73,14 @@ spec:
           workspace: maven-settings
         - name: source
           workspace: shared-workspace
+    - name: generate-build-id
+      taskRef:
+        name: generate-build-id
+      params:
+        - name: version
+          value: "$(params.version)"
+      runAfter:
+        - maven-run             
     - name: list-directory
       taskRef:
         name: list-directory
@@ -81,15 +93,17 @@ spec:
       taskRef:
         name: buildah
       runAfter:
+        - generate-build-id
         - list-directory
       workspaces:
         - name: source
           workspace: shared-workspace
       params:
         - name: IMAGE
-          value: "$(params.IMAGE):$(params.buildRevision)"
+          value: "$(params.IMAGE):$(tasks.generate-build-id.results.buildId)"
         - name: DOCKERFILE
           value: deployment/Dockerfile
+        
     - name: update-manifest
       taskRef:
         name: update-yaml
@@ -97,7 +111,7 @@ spec:
         - name: IMAGE
           value: $(params.IMAGE) 
         - name: buildRevision 
-          value: $(params.buildRevision)
+          value: $(tasks.generate-build-id.results.buildId)
         - name: contextPath 
           value: "."
         - name: pathToYamlFile

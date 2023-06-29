@@ -50,7 +50,7 @@ spec:
           value: "true"
     - name: maven-run
       taskRef:
-        name: maven-build
+        name: build-maven-v2
       runAfter:
         - fetch-repository
       params:

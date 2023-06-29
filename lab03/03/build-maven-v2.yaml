@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata: 
+  name: build-maven-v2
+spec: 
+  description: >-
+    This Task can be used to run a Maven build.
+  workspaces:
+    - name: source
+      description: The workspace consisting of maven project.
+    - name: maven-settings
+      description: >-
+        The workspace consisting of the custom maven settings
+        provided by the user.
+  params:
+    - name: GOALS
+      description: maven goals to run
+      type: array
+      default:
+        - "-DskipTests"
+        - "clean"
+        - "package"
+    - name: CONTEXT_DIR
+      description: ContextPath
+      default: "."
+    - name: MAVEN_MIRROR_URL
+      description: The Maven repository mirror url
+      type: string  
+      default: "http://repo1.maven.org/maven2"
+  steps:
+    - name: maven-package 
+      image: gcr.io/cloud-builders/mvn:latest
+      workingDir: $(workspaces.source.path)/$(params.CONTEXT_DIR)
+      command: ["/usr/bin/mvn"]
+      args:
+        - -s
+        - $(workspaces.maven-settings.path)/settings.xml
+        - "$(params.GOALS)"
+      volumeMounts:
+        - name: m2
+          mountPath: /root/.m2
+  volumes:
+    - name: m2
+      persistentVolumeClaim:
+        claimName: maven-repo-pvc

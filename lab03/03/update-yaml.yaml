@@ -34,9 +34,8 @@ spec:
     envFrom:
     - secretRef:
         name: argocd-env-secret
-    env:
-    - name: ARGOCD_SERVER
-      value: "159.122.179.241:30359"
+    - configMapRef:
+        name: argocd-env-configmap
   results:
     - description: The precise commit SHA that was fetched by this Task.
       name: commit
@@ -78,7 +77,7 @@ spec:
         #!/usr/bin/env sh
         set -e
         git config --global user.email "nexweb1@gmail.com"
-        git config --global user.name "yoonjk"
+        git config --global user.name "nexweb"
         ls -al 
         cat $(params.pathToYamlFile) | grep -E "image:" | awk '{print "Before =>"$0 }'
         sed -i "s#$(inputs.params.IMAGE):[a-zA-Z0-9]\\+#$(inputs.params.IMAGE):$(inputs.params.buildRevision)#g" $(params.pathToYamlFile)

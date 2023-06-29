@@ -14,21 +14,21 @@ spec:
     - name: IMAGE
       description: Image description
       type: string
-      default: "docker.io/nexweb1/hello"
+      default: "docker.io/nexweb1/sample"
     - name: TAG
       description: Preferred tag
       default: latest
     - name: buildRevision
       description: Image tag
-    - name: argoAppName
-      description: argo app name 
-      default: sample
-    - name: configGitRevision
-      description: Branch Name of configGit
-      default: main
     - name: deployYamlFile
       description: manifest file
       default: deployment/sample.yaml
+    - name: configGitRevision
+      description: Branch Name of configGit
+      default: main      
+    - name: argoAppName
+      description: argo app name 
+      default: sample
   workspaces:
     - name: shared-workspace
     - name: maven-settings
@@ -88,10 +88,6 @@ spec:
       params:
         - name: IMAGE
           value: "$(params.IMAGE):$(params.buildRevision)"
-        - name: CONTEXT
-          value: "."
-        - name: FORMAT
-          value: "docker"
         - name: DOCKERFILE
           value: deployment/Dockerfile
     - name: update-manifest

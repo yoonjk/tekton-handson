@@ -1,15 +1,13 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: build-deploy-
+  generateName: gitops-pipeline-run-
 spec:
   pipelineRef:
-    name: java-pipeline
-  serviceAccountName: docker-login
+    name: gitops-pipeline
+  serviceAccountName: tekton-pipeline-sa
   timeout: 3m
   params:
-  - name: buildRevision
-    value: 'prod'
   - name: appGitUrl
     value: 'https://gitlab.com/nexweb/sample-service.git'
   - name: appGitRevision
@@ -18,6 +16,8 @@ spec:
     value: 'https://gitlab.com/nexweb/sample-service-deploy.git'
   - name: IMAGE
     value: 'docker.io/nexweb1/sample'
+  - name: buildRevision
+    value: 'prod'    
   - name: deployYamlFile
     value: deployment/sample.yaml
   - name: configGitRevision

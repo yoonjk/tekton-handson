@@ -8,9 +8,9 @@ spec:
   serviceAccountName: tekton-pipeline-sa
   timeout: 3m
   params:
-  - name: appGitUrl
+  - name: url
     value: 'https://gitlab.com/nexweb/sample-service.git'
-  - name: appGitRevision
+  - name: revision
     value: hello
   - name: configGitUrl
     value: 'https://gitlab.com/nexweb/sample-service-deploy.git'

@@ -4,9 +4,9 @@ metadata:
   name: gitops-pipeline
 spec:
   params:
-    - name: appGitUrl
+    - name: url
       description: app git repository
-    - name: appGitRevision
+    - name: revision
       description: Branch Name of appGit
       default: hello
     - name: configGitUrl
@@ -45,9 +45,9 @@ spec:
           workspace: shared-workspace
       params:
         - name: url
-          value: "$(params.appGitUrl)"
+          value: "$(params.url)"
         - name: revision
-          value: hello
+          value: "$(params.revision)"
         - name: subdirectory
           value: ""
         - name: deleteExisting

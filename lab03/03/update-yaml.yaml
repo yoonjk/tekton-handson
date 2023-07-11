@@ -91,7 +91,7 @@ spec:
         git config --global user.name "nexweb"
         ls -al 
         cat $(params.pathToYamlFile) | grep -E "image:" | awk '{print "Before =>"$0 }'
-        sed -i "s#$(inputs.params.IMAGE):[a-zA-Z0-9]\\+#$(inputs.params.IMAGE):$(inputs.params.buildRevision)#g" $(params.pathToYamlFile)
+        sed -i "s#$(inputs.params.IMAGE):.*\\+#$(inputs.params.IMAGE):$(inputs.params.buildRevision)#g" $(params.pathToYamlFile)
         cat $(params.pathToYamlFile) | grep -E "image:" | awk '{print "After =>"$0 }'
         GIT_URL=$(inputs.params.url)
         GIT_REPO=`echo "${GIT_URL:8}"`

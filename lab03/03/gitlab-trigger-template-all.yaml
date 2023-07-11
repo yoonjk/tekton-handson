@@ -1,0 +1,45 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: gitlab-trigger-template
+spec:
+  params:  # 매개변수 정의
+  - name: git-revision
+  - name: git-repo-url
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: trigger-gitops-pipeline-run-  #  Generate name of PipelineRun
+    spec:
+      serviceAccountName: tekton-pipeline-sa
+      timeout: 3m
+      pipelineRef:
+        name: gitops-pipeline 
+      params:
+        - name: url
+          value: $(tt.params.git-repo-url)
+        - name: revision
+          value: $(tt.params.git-revision)
+        - name: configGitUrl
+          value: 'https://gitlab.com/nexweb/sample-service-deploy.git'
+        - name: IMAGE
+          value: 'docker.io/nexweb1/sample'
+        - name: buildRevision
+          value: 'prod'    
+        - name: deployYamlFile
+          value: deployment/sample.yaml
+        - name: configGitRevision
+          value: main
+        - name: argoAppName
+          value: sample             
+      workspaces:
+      - name: maven-settings
+        configMap:
+          name: custom-maven-settings
+      - name: shared-workspace
+        persistentVolumeClaim:
+          claimName: pipeline-pvc
+
+          
+      

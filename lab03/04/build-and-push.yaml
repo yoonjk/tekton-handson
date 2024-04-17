@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-and-push
+  namespace: education
+spec:
+  params:
+    - default: .
+      description: image's context root path
+      name: CONTEXT
+      type: string
+    - default: docker.io/nexweb1/sample
+      description: image name
+      name: IMAGE
+      type: string
+    - default: latest
+      name: IMAGE_TAG
+      type: string
+    - default: vfs
+      description: Set buildah storage driver
+      name: STORAGE_DRIVER
+      type: string
+    - default: 'true'
+      name: TLSVERIFY
+      type: string
+    - default: deployment/Dockerfile
+      name: DOCKERFILE
+      type: string
+    - default: 'true'
+      name: verbose
+      type: string
+    - default: ''
+      name: BUILDER_IMAGE
+      type: string
+    - default: oci
+      description: 'The format of the built container, oci or docker'
+      name: FORMAT
+      type: string
+    - default: ''
+      description: Extra parameters passed for the push command when pushing images.
+      name: PUSH_EXTRA_ARGS
+      type: string
+  results:
+    - description: Digest of the image just built.
+      name: IMAGE_DIGEST
+      type: string
+  steps:
+    - image: $(params.BUILDER_IMAGE)
+      name: build-and-push
+      resources: {}
+      script: >
+        #!/usr/bin/env bash
+
+
+        ls -al
+
+        set -eu 
+
+
+        if [[ "$(params.verbose)" == "true" ]]; then 
+          set -x
+        fi
+
+
+        buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
+          --format=$(params.FORMAT) \
+          --tls-verify=$(params.TLSVERIFY) --no-cache \
+          -f $(params.DOCKERFILE) -t $(params.IMAGE) $(params.CONTEXT)
+
+        ls -al $(workspaces.dockerconfig.path)  
+
+        echo "2.docker config"
+
+        if test -f "$(workspaces.dockerconfig.path)/.dockerconfigjson"; then
+            cp "$(workspaces.dockerconfig.path)/.dockerconfigjson" "$HOME/.docker/config.json"
+            export DOCKER_CONFIG="$HOME/.docker"
+        fi
+
+        buildah --storage-driver=$(params.STORAGE_DRIVER) push
+        --tls-verify=$(params.TLSVERIFY) --digestfile
+        $(workspaces.source.path)/image-digest $(params.IMAGE) 
+        docker://$(params.IMAGE)
+
+        cat $(workspaces.source.path)/image-digest | tee
+        /tekton/results/IMAGE_DIGEST
+      securityContext:
+        privileged: true
+        runAsUser: 0
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+      workingDir: $(workspaces.source.path)
+  volumes:
+    - emptyDir: {}
+      name: varlibcontainers
+  workspaces:
+    - name: source
+    - name: dockerconfig

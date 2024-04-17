@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-maven
+  namespace: education
+spec:
+  params:
+    - default:
+        - clean
+        - package
+        - '-DskipTests'
+      description: The Maven goals to run
+      name: GOALS
+      type: array
+  steps:
+    - args:
+        - '-Dmaven.repo.local=$(workspaces.output.path)'
+        - $(params.GOALS)
+      command:
+        - mvn
+      image: 'docker.io/maven:3.6-jdk-11-slim'
+      name: maven-build
+      resources: {}
+      workingDir: $(workspaces.source.path)
+  workspaces:
+    - name: source

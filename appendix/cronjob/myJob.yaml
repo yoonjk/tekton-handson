@@ -1,0 +1,33 @@
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: myjob-weekly
+  namespace: education
+spec:
+  schedule: 0 0 * * 0
+  concurrencyPolicy: Allow
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: myjob-weekly
+              image: curlimages/curl
+              args:
+                - /bin/sh
+                - '-c'
+                - >-
+                  day=$(echo "$(date -d "@$(($(date +%s) - 7 * 60 * 60 * 24 + 9
+                  * 60 * 60))" '+%Y%m%d%H')"); echo "day=$day"
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

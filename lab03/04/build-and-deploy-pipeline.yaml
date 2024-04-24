@@ -5,11 +5,11 @@ metadata:
   namespace: education
 spec:
   params:
-    - default: 'https://gitlab.com/nexweb/sample-service.git'
+    - default: 'http://119.81.49.13:7990/scm/isw/sample-service.git'
       description: Git repository url
       name: gitUrl
       type: string
-    - default: msa
+    - default: master
       description: Git revision to check out
       name: gitRevision
       type: string
@@ -17,15 +17,15 @@ spec:
       description: 'The path to the build context, used by Kaniko - within the workspace'
       name: pathToContext
       type: string
-    - default: docker.io/nexweb1/sample
+    - default: 'image-registry.apps.openshift-01.knowis.cloud/education/sample:latest'
       description: Image name including repository
-      name: IMAGE
+      name: IMAGE_NAME
       type: string
     - default: latest
       description: Image tag
       name: imageTag
       type: string
-    - default: deployment/deployment.yaml
+    - default: deployment/sample.yaml
       description: The path to the yaml file to deploy within the git source
       name: pathToYamlFile
       type: string
@@ -41,6 +41,10 @@ spec:
           value: $(params.gitRevision)
         - name: deleteExisting
           value: 'true'
+        - name: sslVerify
+          value: 'false'
+        - name: noProxy
+          value: 'true'
       taskRef:
         kind: Task
         name: git-clone
@@ -48,18 +52,29 @@ spec:
         - name: output
           workspace: source
     - name: build-maven
+      params:
+        - name: GOALS
+          value:
+            - '-B'
+            - clean
+            - package
+            - '-DskipTests'
       runAfter:
         - clone-repo
       taskRef:
         kind: Task
-        name: build-maven
+        name: maven
       workspaces:
         - name: source
           workspace: source
+        - name: maven-settings
+          workspace: maven-settings
+        - name: dockerconfig
+          workspace: dockerconfig
     - name: build-and-push
       params:
         - name: IMAGE
-          value: docker.io/nexweb1/sample
+          value: $(params.IMAGE_NAME)
         - name: IMAGE_TAG
           value: latest
         - name: BUILDER_IMAGE
@@ -67,13 +82,15 @@ spec:
             registry.redhat.io/rhel8/buildah@sha256:ac0b8714cc260c94435cab46fe41b3de0ccbc3d93e38c395fa9d52ac49e521fe
         - name: DOCKERFILE
           value: deployment/Dockerfile
-        - name: tlsVerify
-          value: 'true'
+        - name: TLSVERIFY
+          value: 'false'
+        - name: STORAGE_DRIVER
+          value: vfs
       runAfter:
         - build-maven
       taskRef:
-        kind: Task
-        name: build-and-push
+        kind: ClusterTask
+        name: buildah
       timeout: 2m0s
       workspaces:
         - name: source
@@ -84,9 +101,10 @@ spec:
       params:
         - name: SCRIPT
           value: |
-            oc new-app --name=$(params.APP_NAME) \
-              --docker-image=$(params.IMAGE) \
-              --as-deployment-config \
+            echo "deploy to cluster"
+            oc delete all --selector app=$(params.APP_NAME) -n education-dev
+            ls -al
+            oc apply -f  $(params.pathToYamlFile) \
               -n education-dev
       runAfter:
         - build-and-push
@@ -99,3 +117,4 @@ spec:
   workspaces:
     - name: source
     - name: dockerconfig
+    - name: maven-settings

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample
+  labels:
+    app: sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      containers:
+      - name: sample
+        image: default-route-openshift-image-registry.apps.openshift-01.knowis.cloud/education/sample:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample
+  labels:
+    app: sample
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: sample
+

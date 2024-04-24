@@ -1,0 +1,9 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: pipeline-dockercfg-bqbsn
+  namespace: education
+data:
+  .dockercfg: >-
+    xxx
+type: kubernetes.io/dockercfg

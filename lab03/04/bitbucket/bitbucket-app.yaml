@@ -1,0 +1,40 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: bitbucket
+  namespace: education-dev2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bitbucket
+  template:
+    metadata:
+      labels:
+        app: bitbucket
+    spec:
+      volumes:
+        - name: bitbucket-appdata
+          persistentVolumeClaim:
+            claimName: bitbucket-pvc
+      containers:
+        - resources: {}
+          terminationMessagePath: /dev/termination-log
+          name: bitbucket
+          env:
+            - name: SERVER_SECURE
+              value: 'false'
+            - name: SERVER_SCHEME
+              value: http
+            - name: SERVER_PROXY_PORT
+              value: '80'
+          ports:
+            - name: bitbucket-http
+              containerPort: 7990
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: bitbucket-appdata
+              mountPath: /var/atlassian/application-data/bitbucket
+          terminationMessagePolicy: File
+          image: atlassian/bitbucket-server

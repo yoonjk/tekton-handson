@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: bitbucket
+  namespace: education-dev2
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 7990
+      targetPort: bitbucket-http
+  type: ClusterIP
+  selector:
+    app: bitbucket

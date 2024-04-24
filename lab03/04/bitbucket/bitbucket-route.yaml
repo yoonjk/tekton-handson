@@ -1,0 +1,13 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: bitbucket
+  namespace: education-dev2
+spec:
+  host: bitbucket-education-dev2.apps.openshift-01.knowis.cloud
+  to:
+    kind: Service
+    name: bitbucket-svc
+    weight: 100
+  port:
+    targetPort: http

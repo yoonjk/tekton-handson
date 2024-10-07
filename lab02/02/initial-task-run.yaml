@@ -1,10 +1,10 @@
 apiVersion: tekton.dev/v1beta1 
 kind: TaskRun
 metadata:
-  name: initial-user00-task-run
+  name: initial-task-run
 spec:
   taskRef:
-    name: initial-user00-task
+    name: initial-task
   workspaces:
     - name: task-ws 
       persistentVolumeClaim:

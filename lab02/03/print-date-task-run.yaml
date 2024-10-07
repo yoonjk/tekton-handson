@@ -1,9 +1,9 @@
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun 
 metadata:
-  name: print-date-user00-task-run
+  name: print-date-task-run
 spec:
   taskRef:
-    name: print-date-user00-task
+    name: print-date-task
 
     

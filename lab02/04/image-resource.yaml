@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1alpha1 
 kind: PipelineResource 
 metadata:
-  name: my-user00-image 
+  name: my-image 
 spec:
   type: image
   params:

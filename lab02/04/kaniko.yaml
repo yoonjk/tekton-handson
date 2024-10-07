@@ -1,0 +1,68 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-push-task
+spec:
+  description: This Task builds a simple Dockerfile with kaniko and pushes to a registry.
+    This Task stores the image name and digest as results, allowing Tekton Chains
+    to pick up that an image was built & sign it.
+  params:
+  - name: IMAGE
+    description: Name (reference) of the image to build.
+    type: string
+    default: docker.io/nexweb1/sample:dev
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build.
+    type: string
+    default: app/nodejs/Dockerfile
+  - name: CONTEXT
+    description: The build context used by Kaniko.
+    type: string
+    default: ./    
+  - name: EXTRA_ARGS
+    default: ""
+  - name: BUILDER_IMAGE
+    description: The image on which builds will run
+    type: string
+    default: gcr.io/kaniko-project/executor:latest
+  results:
+  - name: IMAGE_DIGEST
+    description: Digest of the image just built.
+    type: string
+  - name: IMAGE_URL
+    description: URL of the image just built.
+    type: string
+    default: gcr.io/kaniko-project/executor:latest
+  steps:
+  - args:
+    - $(params.EXTRA_ARGS)
+    - --dockerfile=$(params.DOCKERFILE)
+    - --context=$(workspaces.source.path)/$(params.CONTEXT)
+    - --destination=$(params.IMAGE)
+    - --digest-file=$(results.IMAGE_DIGEST.path)
+    computeResources: {}
+    image: $(params.BUILDER_IMAGE)
+    name: build-and-push
+    securityContext:
+      runAsUser: 0
+    workingDir: $(workspaces.source.path)
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /kaniko/.docker    
+  volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: dockerhub-credentials
+        items:
+          - key: .dockerconfigjson
+            path: config.json    
+  - computeResources: {}
+    image: docker.io/library/bash:5.1.4@sha256:c523c636b722339f41b6a431b44588ab2f762c5de5ec3bd7964420ff982fb1d9
+    name: write-url
+    script: |
+      set -e
+      image="$(params.IMAGE)"
+      echo -n "${image}" | tee "$(results.IMAGE_URL.path)"
+  workspaces:
+  - description: Holds the context and Dockerfile
+    name: source

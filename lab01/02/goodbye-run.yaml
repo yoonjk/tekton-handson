@@ -1,7 +1,9 @@
 apiVersion: tekton.dev/v1beta1 
 kind: TaskRun 
 metadata:
-  name: goodbye-user00-run 
+  name: goodbye-run 
 spec: 
   taskRef:
-    name: goodbye-user00
+    name: goodbye
+
+    

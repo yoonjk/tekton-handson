@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
-  generateName: build-push-user00-task-run-
+  generateName: build-push-task-run-
 spec:
   serviceAccountName: default
   resources:

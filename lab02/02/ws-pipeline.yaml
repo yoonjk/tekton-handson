@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1 
 kind: Pipeline 
 metadata: 
-  name: ws-user00-pipeline
+  name: ws-pipeline
 spec:
   workspaces:
     - name: pipeline-ws 
@@ -9,15 +9,17 @@ spec:
   tasks:
     - name: initial-task 
       taskRef:
-        name: initial-user00-task
+        name: initial-task
       workspaces:
         - name: task-ws 
           workspace: pipeline-ws
     - name: final-task 
       taskRef:
-        name: final-user00-task
+        name: final-task
       runAfter:
         - "initial-task"
       workspaces:
         - name: task-ws
           workspace: pipeline-ws
+
+          

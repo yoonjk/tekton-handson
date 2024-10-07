@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
 metadata:
-  name: nodejs-user00-source
+  name: nodejs-source
 spec:
   type: git
   params:

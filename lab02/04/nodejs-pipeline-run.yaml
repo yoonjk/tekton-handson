@@ -1,15 +1,25 @@
-apiVersion: tekton.dev/v1beta1 
+apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
-metadata: 
-  generateName: nodejs-pipeline-run- 
-spec: 
-  resources:
-    - name: appSource
-      resourceRef:
-        name: nodejs-source
-    - name: appImage
-      resourceRef: 
-        name: my-image
+metadata:
+  generateName: nodejs-pipelinerun-
+spec:
+  serviceAccountName: default
   pipelineRef:
     name: nodejs-pipeline
-  
+  params:
+    - name: IMAGE
+      value: docker.io/nexweb1/nodejs-app
+    - name: TAG
+      value: latest
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+    - name: docker-credentials
+      secret:
+        secretName: docker-credentials             

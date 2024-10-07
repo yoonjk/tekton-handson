@@ -1,10 +1,12 @@
 apiVersion: tekton.dev/v1beta1 
 kind: TaskRun 
 metadata: 
-  name: hello-with-params-user00-run 
+  name: hello-with-params-run 
 spec:
   params:
     - name: person 
       value: user00
   taskRef:
-    name: hello-with-params-user00
+    name: hello-with-params
+
+    

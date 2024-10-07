@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: print-date-user00-task
+  name: print-date-task
   annotations:
     description: |
             A simple task that prints the date
@@ -24,3 +24,4 @@ spec:
         dt=`cat $(results.current-date-unix-timestamp.path)`
         date | tee $(results.current-date-human-readable.path)  
         echo "Before step results:"$dt
+

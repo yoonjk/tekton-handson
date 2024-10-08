@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: task-with-results
+spec:
+  # Task에서 생성할 result 정의
+  results:
+  - name: example-result
+    description: "This is an example result"
+  steps:
+  - name: generate-result
+    image: alpine
+    script: |
+      # 결과를 /tekton/results/<result-name> 경로에 출력
+      echo "Hello Tekton" > /tekton/results/example-result
+

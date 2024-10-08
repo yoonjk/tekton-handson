@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1 
+kind: PipelineRun 
+metadata: 
+  generateName: build-and-deploy-pipeline-run-
+spec: 
+  workspaces: 
+    - name: git-source 
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 512Mi     
+  params:
+    - name: url 
+      value: "https://gitlab.com/nexweb/sample-service.git"
+  serviceAccountName: tekton-pipeline-sa
+  pipelineRef: 
+    name: build-and-deploy-pipeline 
+

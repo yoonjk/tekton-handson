@@ -6,6 +6,8 @@ kubectl create secret docker-registry docker-credentials \
 --docker-password=passwd \
 --docker-email=test@gmail.com
 
+
+
 ## Download tasks from tekton hub
 tkn hub install task git-clone
 tkn hub install task kaniko

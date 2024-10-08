@@ -1,38 +1,51 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: build-push-task
+  annotations:
+    tekton.dev/categories: Image Build
+    tekton.dev/displayName: Build and upload container image using Kaniko
+    tekton.dev/pipelines.minVersion: 0.17.0
+    tekton.dev/platforms: linux/amd64,linux/arm64,linux/ppc64le
+    tekton.dev/tags: image-build
+  creationTimestamp: "2024-10-07T08:21:06Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/version: "0.6"
+    hub.tekton.dev/catalog: tekton
+  name: kaniko
+  namespace: default
+  resourceVersion: "67922"
+  uid: b80af931-597a-4624-aed6-c510ba0a058f
 spec:
   description: This Task builds a simple Dockerfile with kaniko and pushes to a registry.
     This Task stores the image name and digest as results, allowing Tekton Chains
     to pick up that an image was built & sign it.
   params:
-  - name: IMAGE
-    description: Name (reference) of the image to build.
+  - description: Name (reference) of the image to build.
+    name: IMAGE
     type: string
-    default: docker.io/nexweb1/sample:dev
-  - name: DOCKERFILE
+  - default: ./Dockerfile
     description: Path to the Dockerfile to build.
+    name: DOCKERFILE
     type: string
-    default: app/nodejs/Dockerfile
-  - name: CONTEXT
+  - default: ./
     description: The build context used by Kaniko.
+    name: CONTEXT
     type: string
-    default: ./    
-  - name: EXTRA_ARGS
-    default: ""
-  - name: BUILDER_IMAGE
-    description: The image on which builds will run
+  - default: []
+    name: EXTRA_ARGS
+    type: array
+  - default: gcr.io/kaniko-project/executor:v1.5.1@sha256:c6166717f7fe0b7da44908c986137ecfeab21f31ec3992f6e128fff8a94be8a5
+    description: The image on which builds will run (default is v1.5.1)
+    name: BUILDER_IMAGE
     type: string
-    default: gcr.io/kaniko-project/executor:latest
   results:
-  - name: IMAGE_DIGEST
-    description: Digest of the image just built.
+  - description: Digest of the image just built.
+    name: IMAGE_DIGEST
     type: string
-  - name: IMAGE_URL
-    description: URL of the image just built.
+  - description: URL of the image just built.
+    name: IMAGE_URL
     type: string
-    default: gcr.io/kaniko-project/executor:latest
   steps:
   - args:
     - $(params.EXTRA_ARGS)
@@ -46,16 +59,6 @@ spec:
     securityContext:
       runAsUser: 0
     workingDir: $(workspaces.source.path)
-    volumeMounts:
-      - name: kaniko-secret
-        mountPath: /kaniko/.docker    
-  volumes:
-    - name: kaniko-secret
-      secret:
-        secretName: dockerhub-credentials
-        items:
-          - key: .dockerconfigjson
-            path: config.json    
   - computeResources: {}
     image: docker.io/library/bash:5.1.4@sha256:c523c636b722339f41b6a431b44588ab2f762c5de5ec3bd7964420ff982fb1d9
     name: write-url
@@ -66,3 +69,7 @@ spec:
   workspaces:
   - description: Holds the context and Dockerfile
     name: source
+  - description: Includes a docker `config.json`
+    mountPath: /kaniko/.docker
+    name: dockerconfig
+    optional: true

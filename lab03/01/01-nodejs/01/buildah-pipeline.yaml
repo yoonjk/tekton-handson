@@ -1,0 +1,72 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: buildah-pipeline
+  namespace: default
+spec:
+  params:
+  - default: docker.io/nexweb1/nodejs-app
+    description: Image description
+    name: IMAGE
+    type: string
+  - default: latest
+    description: Preferred tag
+    name: TAG
+    type: string
+  - default: https://gitlab.com/nexweb/tekton-handson
+    description: my nodejs demo
+    name: gitUrl
+    type: string
+  - default: Dockerfile
+    description: Dockerfile path
+    name: DOCKERFILE
+    type: string
+  tasks:
+  - name: git-clone
+    params:
+    - name: url
+      value: $(params.gitUrl)
+    - name: subdirectory
+      value: ""
+    - name: deleteExisting
+      value: "true"
+    taskRef:
+      kind: Task
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: source
+  - name: build-and-push
+    params:
+    - name: IMAGE
+      value: $(params.IMAGE):$(params.TAG)
+    - name: CONTEXT
+      value: .
+    - name: FORMAT
+      value: docker
+    - name: DOCKERFILE
+      value: $(params.DOCKERFILE)
+    runAfter:
+    - git-clone
+    taskRef:
+      kind: Task
+      name: buildah
+    workspaces:
+    - name: source
+      workspace: source
+  - name: create-deployment
+    params:
+    - name: script
+      value: |
+        kubectl apply --filename deployment.yaml
+    runAfter:
+    - build-and-push
+    taskRef:
+      kind: Task
+      name: kubernetes-actions
+    workspaces:
+    - name: manifest-dir
+      workspace: source
+  workspaces:
+  - name: source
+  - name: docker-credentials

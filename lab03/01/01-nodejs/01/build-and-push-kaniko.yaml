@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-and-push-kaniko
+spec:
+  params:
+  - default: .
+    description: image's context root path
+    name: CONTEXT
+    type: string
+  - default: docker.io/nexweb1/nodejs
+    description: image name
+    name: IMAGE
+    type: string
+  - default: "true"
+    name: tlsVerify
+    type: string
+  - default: app/nodejs/Dockerfile"
+    name: DOCKERFILE
+    type: string
+  - default: oci
+    name: FORMAT
+    type: string
+  - default: "true"
+    name: verbose
+    type: string
+  - default: gcr.io/kaniko-project/executor:v1.14.0-debug
+    name: BUILD_IMAGE
+    type: string
+  steps:
+  - command:
+    - /kaniko/executor
+    - --dockerfile=$(params.DOCKERFILE)
+    - --context=$(workspaces.source.path)/$(params.CONTEXT)
+    - --destination=$(params.IMAGE)
+    computeResources: {}
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    - name: IMAGE_DIGEST
+    image: $(params.BUILD_IMAGE)
+    name: build-and-push-kaniko
+    volumeMounts:
+    - mountPath: /tekton/home/.docker
+      name: kaniko-secret
+    workingDir: $(workspaces.source.path)
+  volumes:
+  - name: kaniko-secret
+    secret:
+      items:
+      - key: .dockerconfigjson
+        path: config.json
+      secretName: docker-credentials
+  workspaces:
+  - name: source

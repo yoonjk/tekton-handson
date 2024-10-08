@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: example-pipeline
+spec:
+  tasks:
+  - name: first-task
+    taskRef:
+      name: task-with-results
+  - name: second-task
+    runAfter:
+    - first-task
+    taskSpec:
+      steps:
+      - name: print-result
+        image: alpine
+        script: |
+          # 이전 태스크의 결과 값을 참조
+          RESULT=$(tasks.first-task.results.example-result)
+          echo "The result from first-task is: $RESULT"

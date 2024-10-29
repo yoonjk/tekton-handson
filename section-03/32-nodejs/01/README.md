@@ -10,5 +10,5 @@ kubectl create secret docker-registry docker-credentials \
 
 ## Download tasks from tekton hub
 tkn hub install task git-clone
-tkn hub install task kaniko
+tkn hub install task buildah
 tkn hub install task kubernetes-actions --version 0.2

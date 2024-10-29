@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: build-and-push-kaniko
+  name: build-and-push
 spec:
   params:
   - default: .
@@ -15,7 +15,7 @@ spec:
   - default: "true"
     name: tlsVerify
     type: string
-  - default: Dockerfile
+  - default: Dockerfile"
     name: DOCKERFILE
     type: string
   - default: oci
@@ -24,27 +24,37 @@ spec:
   - default: "true"
     name: verbose
     type: string
-  - default: gcr.io/kaniko-project/executor:v1.14.0-debug
+  - default: quay.io/buildah/stable
     name: BUILD_IMAGE
     type: string
   steps:
-  - command:
-    - /kaniko/executor
-    - --dockerfile=$(params.DOCKERFILE)
-    - --context=$(workspaces.source.path)/$(params.CONTEXT)
-    - --destination=$(params.IMAGE)
+    script: |
+      #!/usr/bin/env bash
+      set -eu 
+
+      if [[ "$(params.verbose)" == "true" ]]; then 
+        set -x
+      fi
+
+      buildah bud --tls-verify=$(params.tlsVerify) \
+      --layers  -f $(params.DOCKERFILE) \
+      -t $(params.IMAGE) $(params.CONTEXT)
+      buildah push --tls-verify=$(params.tlsVerify) $(params.IMAGE)   
     computeResources: {}
     env:
     - name: DOCKER_CONFIG
       value: /tekton/home/.docker
-    - name: IMAGE_DIGEST
     image: $(params.BUILD_IMAGE)
-    name: build-and-push-kaniko
+    name: build-and-push-buildah
     volumeMounts:
     - mountPath: /tekton/home/.docker
       name: kaniko-secret
+    - name: varlibc
+      mountPath: /var/lib/containers      
     workingDir: $(workspaces.source.path)
   volumes:
+  - name: varlibc 
+    emptyDir: {}  
   - name: kaniko-secret
     secret:
       items:

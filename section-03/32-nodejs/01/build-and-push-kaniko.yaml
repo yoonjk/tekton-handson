@@ -24,7 +24,7 @@ spec:
   - default: "true"
     name: verbose
     type: string
-  - default: gcr.io/kaniko-project/executor:v1.14.0-debug
+  - default: gcr.io/kaniko-project/executor:debug
     name: BUILD_IMAGE
     type: string
   steps:
@@ -37,7 +37,6 @@ spec:
     env:
     - name: DOCKER_CONFIG
       value: /tekton/home/.docker
-    - name: IMAGE_DIGEST
     image: $(params.BUILD_IMAGE)
     name: build-and-push-kaniko
     volumeMounts:
